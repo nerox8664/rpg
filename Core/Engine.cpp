@@ -64,6 +64,10 @@ void Engine::DetachModule(uint16_t id) {
   }
 }
 
+Module* Engine::GetModule(uint16_t id) {
+  return modules[id];
+}
+
 uint64_t Engine::Subscribe( std::pair<Event_t, Event_sub_t> ev, std::function<void(Event&)> act) {
   static uint64_t evLastId = 0;
   mailboxes[ev][evLastId++]=act;
@@ -199,19 +203,19 @@ int Engine::MainLoop() {
       ProvideEvent(sdlEvent);
     }
 
-    Event beforeRender;
-    beforeRender.type = EVENT_TYPE_GENERAL;
-    beforeRender.subtype = EVENT_GENERAL_BEFORE_RENDER;
-    ProvideEvent(beforeRender);
+    Event beforeTick;
+    beforeTick.type = EVENT_TYPE_GENERAL;
+    beforeTick.subtype = EVENT_GENERAL_BEFORE_TICK;
+    ProvideEvent(beforeTick);
 
     for(auto i: modules) {
       i.second->Tick(SDL_GetTicks());
     }
 
-    Event afterRender;
-    afterRender.type = EVENT_TYPE_GENERAL;
-    afterRender.subtype = EVENT_GENERAL_AFTER_RENDER;
-    ProvideEvent(afterRender);
+    Event afterTick;
+    afterTick.type = EVENT_TYPE_GENERAL;
+    afterTick.subtype = EVENT_GENERAL_AFTER_TICK;
+    ProvideEvent(afterTick);
   }
 
   return 0;

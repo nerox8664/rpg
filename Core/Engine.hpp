@@ -41,7 +41,7 @@ public:
   void DetachModule(uint16_t id);
   Module* GetModule(uint16_t id);
 
-  inline void ProvideEvent(Event e);
+  void ProvideEvent(Event e);
   uint64_t Subscribe( std::pair<Event_t, Event_sub_t> ev, std::function<void(Event&)> act) ;
   void Unsubscribe( std::pair<Event_t, Event_sub_t> ev, uint64_t id) ;
   uint64_t SubscribeToTimer(uint64_t interval, std::function<void(Event&)> act);

@@ -25,9 +25,6 @@ public:
   virtual void OnAttach() ;
   virtual void OnDetach() ;
 
-  void BeforeRenderer(Event &e) ;
-  void AfterRenderer(Event &e) ;
-
   void Tick(uint64_t time) ;
 
 };

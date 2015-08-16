@@ -88,46 +88,46 @@ void Renderer::FPSTimer(Event &e) {
 }
 
 void Renderer::OnAttach() {
-	using namespace std::placeholders;
-  std::function<void(Event&)> beforeRendererCB = std::bind(&Renderer::BeforeRenderer, (Renderer*)this, _1);
-  Engine::GetInstance()->Subscribe(
-    std::pair<Event_t, Event_sub_t>(EVENT_TYPE_GENERAL, EVENT_GENERAL_BEFORE_RENDER),
-    beforeRendererCB
-  );
-
-  std::function<void(Event&)> afterRendererCB = std::bind(&Renderer::AfterRenderer, (Renderer*)this, _1);
-  Engine::GetInstance()->Subscribe(
-    std::pair<Event_t, Event_sub_t>(EVENT_TYPE_GENERAL, EVENT_GENERAL_AFTER_RENDER),
-    afterRendererCB
-  );
-
+  using namespace std::placeholders;
   std::function<void(Event&)> fpsTimerCB = std::bind(&Renderer::FPSTimer, (Renderer*)this, _1);
   fpsTimerId = Engine::GetInstance()->SubscribeToTimer(1000, fpsTimerCB);
-  std::cout<<"Renderer attached";
 }
 
 void Renderer::OnDetach() {
 
 }
 
-void Renderer::BeforeRenderer(Event &e) {
-	glClear( GL_COLOR_BUFFER_BIT );
+void Renderer::Tick(uint64_t time) {
+  Event beforeRender;
+  beforeRender.type = EVENT_TYPE_GENERAL;
+  beforeRender.subtype = EVENT_GENERAL_BEFORE_RENDER;
+  Engine::GetInstance()->ProvideEvent(beforeRender);
+
+  glClear( GL_COLOR_BUFFER_BIT );
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-
   glPushMatrix();
-}
 
-void Renderer::AfterRenderer(Event &e) {
-	glPopMatrix();
+  Event sceneRender;
+  sceneRender.type = EVENT_TYPE_GENERAL;
+  sceneRender.subtype = EVENT_GENERAL_SCENE_RENDER;
+  Engine::GetInstance()->ProvideEvent(sceneRender);
 
+  Event guiRender;
+  guiRender.type = EVENT_TYPE_GENERAL;
+  guiRender.subtype = EVENT_GENERAL_GUI_RENDER;
+  Engine::GetInstance()->ProvideEvent(guiRender);
+
+  glPopMatrix();
   glFlush();
   SDL_GL_SwapWindow(win);
 
   int maxFPS = ini_int("Engine", "maxFPS");
   SDL_Delay( (1000.0) / maxFPS );
-}
 
-void Renderer::Tick(uint64_t time) {
+  Event afterRender;
+  afterRender.type = EVENT_TYPE_GENERAL;
+  afterRender.subtype = EVENT_GENERAL_AFTER_RENDER;
+  Engine::GetInstance()->ProvideEvent(afterRender);
 	frames++;
 }
