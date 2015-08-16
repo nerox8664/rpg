@@ -1,7 +1,7 @@
-#include "Core/Renderer.hpp"
+#include "Core/Modules/Renderer.hpp"
 
 
-Renderer::Renderer() : Module() {
+Renderer::Renderer() : Module(), frames(0) {
 	int request = SDL_GetDesktopDisplayMode(0, &displayMode);
   int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 
@@ -81,19 +81,28 @@ Renderer::~Renderer() {
 
 }
 
+void Renderer::FPSTimer(Event &e) {
+	log_debug( "Renderer::FPSTimer: FPS = " + std::to_string(frames) );
+  fps = frames;
+  frames = 0;
+}
+
 void Renderer::OnAttach() {
 	using namespace std::placeholders;
-  std::function<void(Event&)> cb = std::bind(&Renderer::BeforeRenderer, (Renderer*)this, _1);
+  std::function<void(Event&)> beforeRendererCB = std::bind(&Renderer::BeforeRenderer, (Renderer*)this, _1);
   Engine::GetInstance()->Subscribe(
     std::pair<Event_t, Event_sub_t>(EVENT_TYPE_GENERAL, EVENT_GENERAL_BEFORE_RENDER),
-    cb
+    beforeRendererCB
   );
 
-  std::function<void(Event&)> cb_after = std::bind(&Renderer::AfterRenderer, (Renderer*)this, _1);
+  std::function<void(Event&)> afterRendererCB = std::bind(&Renderer::AfterRenderer, (Renderer*)this, _1);
   Engine::GetInstance()->Subscribe(
     std::pair<Event_t, Event_sub_t>(EVENT_TYPE_GENERAL, EVENT_GENERAL_AFTER_RENDER),
-    cb_after
+    afterRendererCB
   );
+
+  std::function<void(Event&)> fpsTimerCB = std::bind(&Renderer::FPSTimer, (Renderer*)this, _1);
+  fpsTimerId = Engine::GetInstance()->SubscribeToTimer(1000, fpsTimerCB);
   std::cout<<"Renderer attached";
 }
 
@@ -114,8 +123,11 @@ void Renderer::AfterRenderer(Event &e) {
 
   glFlush();
   SDL_GL_SwapWindow(win);
+
+  int maxFPS = ini_int("Engine", "maxFPS");
+  SDL_Delay( (1000.0) / maxFPS );
 }
 
 void Renderer::Tick(uint64_t time) {
-	
+	frames++;
 }

@@ -24,24 +24,18 @@ bool fileExists(std::string path) {
     }
 }
 
-// данна€ функци€ используетс€ дл€ вывода информации о ходе компил€ции шейдеров
 void PrintProgramLog(GLuint obj) {
     int infologLength = 0;
     int charsWritten  = 0;
     char *infoLog;
 
-    // получение размера лога
     glGetProgramiv(obj, GL_INFO_LOG_LENGTH,&infologLength);
 
     if (infologLength > 0)
     {
-        // выделение пам€ти под лог
         infoLog = (char *)malloc(infologLength);
-        // получение лога
         glGetProgramInfoLog(obj, infologLength, &charsWritten, infoLog);
-        // вывод лога на консоль
         printf("%s\n",infoLog);
-        // освобождение пам€ти лога, т.к. она больше не нужна
         free(infoLog);
     }
 }

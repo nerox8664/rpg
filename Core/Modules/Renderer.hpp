@@ -10,6 +10,13 @@ protected:
 	SDL_DisplayMode   displayMode;
   SDL_Window*       win;
   SDL_GLContext     context;
+
+  uint64_t fpsTimerId;
+  uint32_t fps;
+  uint32_t frames;
+  
+  void FPSTimer(Event &e);
+
 public:
 
   Renderer();

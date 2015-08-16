@@ -74,47 +74,129 @@ void Engine::Unsubscribe(std::pair<Event_t, Event_sub_t> ev, uint64_t id) {
   mailboxes[ev].erase(id);
 }
 
+uint64_t Engine::SubscribeToTimer(uint64_t interval, std::function<void(Event&)> act) {
+  static uint64_t timerLastId = 1;
+  static uint64_t cbLastId = 0;
+
+  if (timers.find(interval) == timers.end()) {
+    timers[interval].first = SDL_AddTimer( interval, &Engine::TimerTick, (void*)timerLastId++);
+  }
+
+  timers[interval].second[cbLastId++] = act;
+  return cbLastId - 1;
+}
+
+void Engine::UnsubscribeFromTimer(uint64_t interval, uint64_t id) {
+  timers[interval].second.erase(id);
+  if (timers[interval].second.size() == 0) {
+    SDL_RemoveTimer(timers[interval].first);
+  }
+}
+
+unsigned int Engine::TimerTick(unsigned int interval, void* data) {
+  Event ev;
+  ev.type = EVENT_TYPE_TIMER;
+  ev.subtype = EVENT_TIMER_TIMEOUT;
+  ev.data["timer.interval"] = interval;
+  ev.data["timer.timerId"] = (uint64_t)data;
+  instance->ProvideEvent(ev);
+
+  for(auto i : instance->timers[interval].second ) {
+    i.second(ev);
+  }
+
+  return interval;
+}
+
 void Engine::ProvideEvent(Event e) {
-  for ( auto i : mailboxes[std::pair<Event_t, Event_sub_t>(e.type, e.subtype)]) {
+  eventsPerTick++;
+  for (auto i : mailboxes[std::pair<Event_t, Event_sub_t>(e.type, e.subtype)]) {
     i.second(e);
+  }
+  if (e.subtype != EVENT_ANY_ANY) {
+    // For all observers in category
+    for (auto i : mailboxes[std::pair<Event_t, Event_sub_t>(e.type, EVENT_ANY_ANY)]) {
+      i.second(e);
+    }
+  }
+  if (e.type != EVENT_ANY) {
+    // For global observers
+    for (auto i : mailboxes[std::pair<Event_t, Event_sub_t>(EVENT_ANY, EVENT_ANY_ANY)]) {
+      i.second(e);
+    }
   }
 }
 
 int Engine::MainLoop() {
-  log_debug("Run main loop");
+  #ifdef DEBUG
+    log_debug("Run main loop");
+
+    Subscribe(
+    std::pair<Event_t, Event_sub_t>(EVENT_TYPE_KEYBOARD, EVENT_KEYBOARD_KEYDOWN),
+    [this](Event& e) { 
+      if (e.data["keyboard.key"]._<char>() == 's') {
+        log_debug("Events :" + std::to_string(eventsPerTick));
+      };
+    });
+  #endif
 
   if (modules.size() == 0) {
     log_warning("Modules not found. Nothing to do.");
     exit(0);
   }
 
+  SDL_StartTextInput(); 
+
   SDL_Event SDLevent;
   bool quit = false;
 
   while(!quit) {
+    eventsPerTick = 0;
 
     while(SDL_PollEvent(&SDLevent)) {
+      Event sdlEvent;
 
-      if(SDLevent.type == SDL_QUIT) {
-        quit = true;
+      switch (SDLevent.type) {
+
+        case SDL_QUIT:
+          sdlEvent.type = EVENT_TYPE_GENERAL;
+          sdlEvent.subtype = EVENT_GENERAL_EXIT;
+          quit = true;
+        break;
+
+        case SDL_KEYUP:
+          sdlEvent.type = EVENT_TYPE_KEYBOARD;
+          sdlEvent.subtype = EVENT_KEYBOARD_KEYUP;
+          sdlEvent.data["keyboard.key"] = SDLevent.key.keysym.sym;
+        break;
+
+        case SDL_KEYDOWN:
+          sdlEvent.type = EVENT_TYPE_KEYBOARD;
+          sdlEvent.subtype = EVENT_KEYBOARD_KEYDOWN;
+          sdlEvent.data["keyboard.key"] = SDLevent.key.keysym.sym;
+        break;
+
+        case SDL_TEXTINPUT :
+          sdlEvent.type = EVENT_TYPE_KEYBOARD;
+          sdlEvent.subtype = EVENT_KEYBOARD_TEXT;
+          sdlEvent.data["text.text"] = SDLevent.text.text;
+        break;
+
+        case SDL_MOUSEMOTION:
+          sdlEvent.type = EVENT_TYPE_MOUSE;
+          sdlEvent.subtype = EVENT_MOUSE_MOTION;
+          sdlEvent.data["motion.x"] = SDLevent.motion.x;
+          sdlEvent.data["motion.y"] = SDLevent.motion.y;
+        break;
+
+        case SDL_MOUSEBUTTONDOWN:
+          sdlEvent.type = EVENT_TYPE_MOUSE;
+          sdlEvent.subtype = EVENT_MOUSE_DOWN;
+          sdlEvent.data["button.button"] = (uint8_t)SDLevent.button.button;
+        break;
       }
 
-      if(SDLevent.type == SDL_KEYUP) {
-        Event keybEvent;
-        keybEvent.type = EVENT_TYPE_KEYBOARD;
-        keybEvent.subtype = EVENT_KEYBOARD_KEYUP;
-        keybEvent.data["keyboard.key"] = SDL_GetScancodeFromKey(SDLevent.key.keysym.sym);
-        ProvideEvent(keybEvent);
-      }
-
-      if(SDLevent.type == SDL_KEYDOWN) {
-        Event keybEvent;
-        keybEvent.type = EVENT_TYPE_KEYBOARD;
-        keybEvent.subtype = EVENT_KEYBOARD_KEYDOWN;
-        keybEvent.data["keyboard.key"] = SDL_GetScancodeFromKey(SDLevent.key.keysym.sym);
-        ProvideEvent(keybEvent);
-      }
-
+      ProvideEvent(sdlEvent);
     }
 
     Event beforeRender;
@@ -130,10 +212,6 @@ int Engine::MainLoop() {
     afterRender.type = EVENT_TYPE_GENERAL;
     afterRender.subtype = EVENT_GENERAL_AFTER_RENDER;
     ProvideEvent(afterRender);
-
-    int maxFPS = ini_int("Engine", "maxFPS");
-    SDL_Delay( (1000.0) / maxFPS );
-
   }
 
   return 0;

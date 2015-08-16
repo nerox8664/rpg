@@ -10,6 +10,7 @@ protected:
   static lua_State * lss;
   static LuaCore * instance;
 
+  std::map<uint64_t, luabridge::LuaRef> luaModules;
 public:
 
   LuaCore();
@@ -22,9 +23,11 @@ public:
   virtual void OnDetach() ;
 
   void Tick(uint64_t time) ;
+  void ProcessEvent(Event& e);
 
 private:
-  
+	static int luaModuleAttach(luabridge::LuaRef v, uint64_t id);
+  static int luaModuleDetach(uint64_t id);
 };
 
 #endif

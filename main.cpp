@@ -1,6 +1,6 @@
 #include "Core/Engine.hpp"
-#include "Core/LuaCore.hpp"
-#include "Core/Renderer.hpp"
+#include "Core/Modules/LuaCore.hpp"
+#include "Core/Modules/Renderer.hpp"
 
 // SDL2 hack
 #undef main
