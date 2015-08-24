@@ -5,9 +5,11 @@
 #define MODULE_RENDERER 0
 #define MODULE_LUACORE 8
 #define MODULE_NODEMANAGER 4
+#define MODULE_CAMERA 2
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_net.h>
+#include <SDL2/SDL_image.h>
 
 extern "C" {
   #include "lua.h"
@@ -21,6 +23,7 @@ extern "C" {
 
 #include <Box2D/Box2D.h>
 #include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 #include <map>
 #include <vector>
@@ -30,11 +33,16 @@ extern "C" {
 #include <functional>
 #include <iostream>
 #include <cstdint>
+#include <locale>
+#include <string>
+#include <fstream>
+#include <dirent.h>
 
 #include <Core/Any.hpp>
 #include <Core/Log.hpp>
 #include <Core/INIConf.hpp>
 #include <Core/Utils.hpp>
+#include <Core/Resource.hpp>
 
 enum Event_t {
   EVENT_TYPE_GENERAL,
@@ -57,7 +65,10 @@ enum Event_sub_t {
   EVENT_GENERAL_BEFORE_RENDER,
   EVENT_GENERAL_AFTER_RENDER,
 
+  EVENT_GENERAL_BEFORE_SCENE_RENDER,
   EVENT_GENERAL_SCENE_RENDER,
+  EVENT_GENERAL_AFTER_SCENE_RENDER,
+
   EVENT_GENERAL_GUI_RENDER,
 
   EVENT_GENERAL_EXIT = 9,

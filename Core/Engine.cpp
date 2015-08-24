@@ -31,17 +31,31 @@ Engine::Engine(std::string configPath) {
 
   log_debug("SDL GL set attributes success");
 
+  // SDL additional modules
+
+  // SDL_net
   if (SDLNet_Init() == -1) {
     log_critical("SDLNet_Init Error");
     exit(-1);
   }
 
   log_debug("SDL_net initialization success");
+  // SDL_net
+
+  // SDL_image
+  int flags = IMG_INIT_JPG | IMG_INIT_PNG;
+  int initted = IMG_Init(flags);
+  if(initted&flags != flags) {
+    log_critical("IMG_Init Error");
+    exit(-1);
+  }
+  // SDL_image
 
   instance = this;
 }
 
 Engine::~Engine() {
+  IMG_Quit();
 }
 
 void Engine::AttachModule(Module* mod, uint16_t id) {
@@ -156,7 +170,7 @@ int Engine::MainLoop() {
 
   while(!quit) {
     eventsPerTick = 0;
-
+    
     while(SDL_PollEvent(&SDLevent)) {
       Event sdlEvent;
 
@@ -202,7 +216,7 @@ int Engine::MainLoop() {
 
       ProvideEvent(sdlEvent);
     }
-
+    
     Event beforeTick;
     beforeTick.type = EVENT_TYPE_GENERAL;
     beforeTick.subtype = EVENT_GENERAL_BEFORE_TICK;

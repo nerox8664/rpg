@@ -4,7 +4,7 @@ CXX = g++
 INCPATH =  -I/usr/include -I./Core/ -I. -DDEBUG
 CXXFLAGS =  -march=native -mtune=native -std=c++11 -Ofast
 
-LIBS = -lGL -lGLU -lGLEW `sdl2-config --libs` -lSDL2_mixer
+LIBS = -lGL -lGLU -lGLEW `sdl2-config --libs` -lSDL2_mixer -lSDL2_image
 LIBS += -lSDL2_ttf -lSDL2_net -lIL -lILU -lsqlite3 -llua -lfreetype
 
 SRC_C_CLIENT=$(wildcard Core/*.c) \

@@ -3,6 +3,7 @@
 #include "Core/Modules/LuaCore.hpp"
 #include "Core/Modules/NodeManager.hpp"
 #include "Core/Modules/Renderer.hpp"
+#include "Core/Modules/Camera.hpp"
 
 #include "Core/Components/ModelComponent.hpp"
 
@@ -23,12 +24,14 @@ int main(int argc, char **argv) {
   e->AttachModule(new Renderer(), MODULE_RENDERER);
   e->AttachModule(new LuaCore(), MODULE_LUACORE);
   e->AttachModule(new NodeManager(), MODULE_NODEMANAGER);
+  e->AttachModule(new Camera(), MODULE_CAMERA);
 
-  for (int i = 0; i < 1000; i++) {
+  for (int i = 0; i < 100; i++) {
     Node *node1 = new Node();
-    node1->SetVar("size", glm::vec2(100,200));
-    node1->AddComponent(new ModelComponent(), 3);
-
+    node1->SetVar("size", glm::vec2(1, 2));
+    ModelComponent *mc = new ModelComponent();
+    mc->AttachTexture(new Texture("test.png"), 0);
+    node1->AddComponent(mc, 3);
     ((NodeManager*)(e->GetModule(MODULE_NODEMANAGER)))->AttachNode(node1);
   }
 

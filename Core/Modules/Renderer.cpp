@@ -35,8 +35,7 @@ Renderer::Renderer() : Module(), frames(0) {
   log_debug("Set SDL_GL params");
 
   SDL_GL_SetSwapInterval(0);
-  SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1);
-  SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 0 );
+
 
   SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, ini_int("Video", "multisampleBuffers") );
   SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, ini_int("Video", "multisampleSamples") );
@@ -44,7 +43,7 @@ Renderer::Renderer() : Module(), frames(0) {
   SDL_GL_SetAttribute( SDL_GL_ACCELERATED_VISUAL, 1 );
 
   log_debug("Try to init glew");
-  glewExperimental = GL_TRUE;
+  
   GLenum glew_status = glewInit();
 
   if (glew_status != 0) {
@@ -62,11 +61,13 @@ Renderer::Renderer() : Module(), frames(0) {
 
   glEnable(GL_MULTISAMPLE);
   glShadeModel( GL_SMOOTH );
-
+  IMG_Load("text.img");
+  
   glEnable( GL_BLEND );
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  
 
-  glEnable( GL_TEXTURE_2D );
+  glEnable(GL_TEXTURE_2D);
 
   log_debug("InitGL ok");
   log_debug("OpenGL information:");
@@ -108,16 +109,26 @@ void Renderer::Tick(uint64_t time) {
   glLoadIdentity();
   glPushMatrix();
 
+  Event beforeSceneRender;
+  beforeSceneRender.type = EVENT_TYPE_GENERAL;
+  beforeSceneRender.subtype = EVENT_GENERAL_BEFORE_SCENE_RENDER;
+  Engine::GetInstance()->ProvideEvent(beforeSceneRender);
+
   Event sceneRender;
   sceneRender.type = EVENT_TYPE_GENERAL;
   sceneRender.subtype = EVENT_GENERAL_SCENE_RENDER;
   Engine::GetInstance()->ProvideEvent(sceneRender);
 
+  Event afterSceneRender;
+  afterSceneRender.type = EVENT_TYPE_GENERAL;
+  afterSceneRender.subtype = EVENT_GENERAL_AFTER_SCENE_RENDER;
+  Engine::GetInstance()->ProvideEvent(afterSceneRender);
+
   Event guiRender;
   guiRender.type = EVENT_TYPE_GENERAL;
   guiRender.subtype = EVENT_GENERAL_GUI_RENDER;
   Engine::GetInstance()->ProvideEvent(guiRender);
-
+  
   glPopMatrix();
   glFlush();
   SDL_GL_SwapWindow(win);

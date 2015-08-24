@@ -7,7 +7,7 @@ Node::Node() {
 }
 
 Node::~Node() {
-  for(auto i: childs) {
+  for(auto i : childs) {
     delete i.second;
   }
 }

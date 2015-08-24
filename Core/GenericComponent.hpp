@@ -7,13 +7,13 @@ class Node;
 
 class GenericComponent {
 protected:
-    Node *parent;
+  Node *parent;
 
 public:
-    virtual void OnAttach(Node*) {};
-    virtual void OnDetach(Node*) {};
+  virtual void OnAttach(Node*) {};
+  virtual void OnDetach(Node*) {};
 
-    virtual void Tick(uint64_t time) = 0;
+  virtual void Tick(uint64_t time) = 0;
 };
 
 #endif

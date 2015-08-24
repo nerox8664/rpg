@@ -9,6 +9,7 @@
 class NodeManager: public Module {
 protected:
   std::map<uint64_t, Node*> nodes;
+  
 public:
 
   NodeManager();
