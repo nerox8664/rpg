@@ -76,8 +76,7 @@ void Shader::SetUniform1f(std::string name, float value) {
       glGetUniformLocation(shader_program, name.c_str()),
       value
     );
-  }
-  else {
+  } else {
     log_warning( "Shader::SetUniform1f: Attempt to set uniform, but shader program not loaded");
   }
 }
@@ -94,6 +93,7 @@ void Shader::Bind() {
   for(auto i : const_uniform1f) {
     SetUniform1f(i.first, i.second);
   }
+  
   for(auto i : const_uniform1i) {
     SetUniform1i(i.first, i.second);
   }

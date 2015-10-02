@@ -38,6 +38,5 @@ int main(int argc, char **argv) {
   e->MainLoop();
 
   delete e;
-
   return 0;
 }

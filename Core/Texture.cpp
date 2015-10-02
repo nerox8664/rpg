@@ -8,8 +8,9 @@ Texture::Texture(std::string filename) {
   int comp;
   unsigned char* image = stbi_load(filename.c_str(), &w, &h, &comp, STBI_rgb_alpha);
 
-  if(image == nullptr)
-      throw(std::string("Failed to load texture"));
+  if(image == nullptr) {
+    throw(std::string("Failed to load texture"));
+  }
 
   glGenTextures(1, &texture);
 

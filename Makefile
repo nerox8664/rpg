@@ -1,5 +1,5 @@
-CC = gcc
-CXX = g++
+CC = clang
+CXX = clang++
 
 INCPATH =  -I/usr/include -I./Core/ -I. -DDEBUG
 CXXFLAGS =  -march=native -mtune=native -std=c++11 -Ofast
@@ -18,10 +18,10 @@ SRC_CPP_CLIENT=$(wildcard Core/*.cpp) \
 OBJ_CLIENT=$(SRC_C_CLIENT:.c=.o) $(SRC_CPP_CLIENT:.cpp=.o)
 
 all: $(OBJ_CLIENT)
-	g++  $(OBJ_CLIENT) $(INCPATH) $(LIBS) $(CXXFLAGS) main.cpp -o bin/main
+	clang++  $(OBJ_CLIENT) $(INCPATH) $(LIBS) $(CXXFLAGS) main.cpp -o bin/main
 
 %.o: %.cpp
-	g++ $(CXXFLAGS) $(INCPATH)  $^ -o $@ -c
+	clang++ $(CXXFLAGS) $(INCPATH)  $^ -o $@ -c
 
 clean:
 	find . -name "*.o" -type f -delete
