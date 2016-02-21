@@ -6,6 +6,7 @@
 #include "Core/Modules/Camera.hpp"
 
 #include "Core/Components/ModelComponent.hpp"
+#include "Elements/Terrain.hpp"
 
 // SDL2 hack
 #undef main
@@ -18,7 +19,7 @@ int main(int argc, char **argv) {
   } else {
     configFile = "config.ini";
   }
-    
+
   Engine *e = new Engine(configFile);
 
   e->AttachModule(new Renderer(), MODULE_RENDERER);
@@ -26,6 +27,10 @@ int main(int argc, char **argv) {
   e->AttachModule(new NodeManager(), MODULE_NODEMANAGER);
   e->AttachModule(new Camera(), MODULE_CAMERA);
 
+  Terrain *terra = new Terrain();
+  ((NodeManager*)(e->GetModule(MODULE_NODEMANAGER)))->AttachNode(terra);
+
+  /*
   for (int i = 0; i < 100; i++) {
     Node *node1 = new Node();
     node1->SetVar("size", glm::vec2(1, 2));
@@ -34,6 +39,7 @@ int main(int argc, char **argv) {
     node1->AddComponent(mc, 3);
     ((NodeManager*)(e->GetModule(MODULE_NODEMANAGER)))->AttachNode(node1);
   }
+  */
 
   e->MainLoop();
 

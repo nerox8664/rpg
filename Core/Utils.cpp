@@ -1,6 +1,9 @@
 #include "Core/Utils.hpp"
 
 std::string readFile(std::string path) {
+  if (!fileExists(path)) {
+    std::cout<<"File " + path + "not exists" << std::endl;
+  }
   std::ifstream infile(path.c_str());
   std::string buf, res;
   while(!infile.eof() && infile.good()) {
@@ -37,6 +40,25 @@ void PrintProgramLog(GLuint obj) {
   }
 }
 
+void checkShader(GLuint shader) {
+    GLint result;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
+    if(result==GL_FALSE)
+    {
+        printf("shader compilation failed!\n");
+        GLint logLen;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLen);
+        if(logLen > 0)
+        {
+            char* log = new char[logLen];
+            GLsizei written;
+            glGetShaderInfoLog(shader, logLen, &written, log);
+            printf("Shader log: \n %s", log);
+            delete[] log;
+        }
+    }
+}
+
 std::wstring widen( const std::string& str, std::locale loc ) {
     setlocale(LC_ALL, "Russian");
     std::wstring out;
@@ -71,7 +93,7 @@ std::wstring widen( const std::string& str, std::locale loc ) {
         else {
           out.append(1, static_cast<wchar_t>(codepoint));
         }
-            
+
         codepoint = 0;
       }
     }
@@ -83,7 +105,7 @@ std::vector<std::string> GetFileList(std::string path) {
   struct dirent *dent;
   std::vector<std::string> list;
 
-  dir = opendir( path.c_str() ); 
+  dir = opendir( path.c_str() );
 
   if(dir!=NULL) {
     while((dent=readdir(dir))!=NULL) {

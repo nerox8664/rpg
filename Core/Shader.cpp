@@ -41,7 +41,7 @@ Shader::Shader(std::string vertex, std::string pixel ) {
 
   // вывод информации о ходе компил¤ции и сборки
   PrintProgramLog(shader_program);
-
+  
   // если были обнаружены ошибки - выходим
   if (glGetError() == GL_NO_ERROR) {
     log_debug("Shader::Shader: Shaders loaded");
@@ -93,7 +93,7 @@ void Shader::Bind() {
   for(auto i : const_uniform1f) {
     SetUniform1f(i.first, i.second);
   }
-  
+
   for(auto i : const_uniform1i) {
     SetUniform1i(i.first, i.second);
   }

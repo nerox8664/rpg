@@ -20,18 +20,24 @@ void Camera::OnAttach() {
 
   Engine::GetInstance()->Subscribe(
     std::pair<Event_t, Event_sub_t>(EVENT_TYPE_KEYBOARD, EVENT_KEYBOARD_KEYDOWN),
-    [this](Event& e) { 
+    [this](Event& e) {
       if (e.data["keyboard.key"]._<char>() == 'q') {
-        pos.z-=0.01;
+        pos.z-=ini_float("Camera", "zspeed");
       };
       if (e.data["keyboard.key"]._<char>() == 'e') {
-        pos.z+=0.01;
+        pos.z+=ini_float("Camera", "zspeed");
       };
       if (e.data["keyboard.key"]._<char>() == 'w') {
-        pos.y+=0.01;
+        pos.y+=ini_float("Camera", "speed");
       };
       if (e.data["keyboard.key"]._<char>() == 's') {
-        pos.y-=0.01;
+        pos.y-=ini_float("Camera", "speed");
+      };
+      if (e.data["keyboard.key"]._<char>() == 'd') {
+        pos.x+=ini_float("Camera", "speed");
+      };
+      if (e.data["keyboard.key"]._<char>() == 'a') {
+        pos.x-=ini_float("Camera", "speed");
       };
     }
   );
@@ -61,5 +67,5 @@ void Camera::OnDetach() {
 }
 
 void Camera::Tick(uint64_t time) {
-  
+
 }
